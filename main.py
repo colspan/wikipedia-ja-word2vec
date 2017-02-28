@@ -20,9 +20,10 @@ class DownloadWikipediaDump(luigi.Task):
     def output(self):
         return luigi.LocalTarget("downloads/jawiki-latest-pages-articles.xml.bz2")
     def run(self):
-        r = requests.get(self.url)
-        with self.output().open("w") as f_out:
-            f_out.write(r.content)
+        r = requests.get(self.url, stream=True)
+        with self.output().open("wb") as f_out:
+            for chunk in r.iter_content(chunk_size=1024):
+                f_out.write(chunk)
 
 
 class DecompressWikipediaDump(luigi.Task):
