@@ -25,7 +25,7 @@ Ubuntu 14.04 LTS
 ## 北海道の市町村同士の類似度を計算する
 ./02_calc_similarity_of_hokkaido_communes.sh
 ## なんとなく楽しそうな加減算をしてみる
-./03_
+./03_operate_words.py
 ```
 
 ## 参考文献
