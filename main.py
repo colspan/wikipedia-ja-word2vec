@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
-
 import glob
 import re
 import logging
@@ -11,7 +9,6 @@ import argparse
 from gensim.models import word2vec
 import requests
 import luigi
-import luigi.contrib.external_program
 
 from utils import split_to_words
 
@@ -43,7 +40,7 @@ class DecompressWikipediaDump(luigi.Task):
             os.system(" ".join(args))
 
 
-class ParseWikipediaDump(luigi.contrib.external_program.ExternalProgramTask):
+class ParseWikipediaDump(luigi.Task):
     """
     ダウンロードしたWikipediaのデータをパースする
     参考 : http://taka-say.hateblo.jp/entry/2016/05/20/221817
@@ -52,18 +49,19 @@ class ParseWikipediaDump(luigi.contrib.external_program.ExternalProgramTask):
         return DecompressWikipediaDump()
     def output(self):
         return luigi.LocalTarget("var/wikipedia_extracted")
-    def program_args(self):
-        args = [
-            "python",
-            "lib/wikiextractor-master/WikiExtractor.py",
-            "-b",
-            "20M",
-            "-o",
-            self.output().path,
-            self.input().path
+    def run(self):
+        import os
+        with self.output().temporary_path() as temp_output_path:
+            args = [
+                "python",
+                "lib/wikiextractor-master/WikiExtractor.py",
+                "-b",
+                "20M",
+                "-o",
+                temp_output_path,
+                self.input().path
             ]
-        print " ".join(args)
-        return args
+            os.system(" ".join(args))
 
 
 class SplitWords(luigi.Task):
