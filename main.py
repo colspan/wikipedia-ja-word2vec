@@ -5,6 +5,7 @@ import glob
 import re
 import logging
 import argparse
+import multiprocessing
 
 from gensim.models import word2vec
 import requests
@@ -65,32 +66,49 @@ class ParseWikipediaDump(luigi.Task):
             os.system(" ".join(args))
 
 
+def split(args):
+    splt_cls, sentence = args
+    return splt_cls().split(sentence)
+
 class SplitWords(luigi.Task):
     """
     パースしたWikipediaの文章を分かち書きする
     """
     splitter = luigi.Parameter(default="mecab")
+    process_num = luigi.IntParameter(default=4)
+    queue_num = luigi.IntParameter(default=20)
     def requires(self):
         return ParseWikipediaDump()
     def output(self):
         return luigi.LocalTarget("var/split_{}_wikipedia.txt".format(self.splitter))
+    def do_map(self, data, f_output):
+        """
+        TODO 並列化方法が非常に汚い
+        """
+        result = self.p.map(split, [(self.splt_cls, x) for x in data])
+        for words in result:
+            print >> f_output, ",".join(words)
     def run(self):
         pattern = re.compile('<doc.*>|<\\/doc>')
         if self.splitter == 'mecab':
-            splitter = MecabSplitter()
+            self.splt_cls = MecabSplitter
         elif self.splitter == 'jumanpp':
-            splitter = JumanPPSplitter()
+            self.splt_cls = JumanPPSplitter
         else:
-            splitter = NoWakatiSplitter()
+            self.splt_cls = NoWakatiSplitter
+        self.p = multiprocessing.Pool(self.process_num)
+        data_queue = []
         with self.output().open("w") as f_output:
             for source in glob.iglob(self.input().path + "/*/wiki*"):
                 with open(source, "r") as f_input:
                     for line in f_input:
                         if pattern.match(line) or len(line) == 1:
                             continue
-                        words = splitter.split(line)
-                        print >> f_output, " ".join(words)
-
+                        data_queue.append(line)
+                        if len(data_queue) >= self.queue_num:
+                             self.do_map(data_queue, f_output)
+                             data_queue = []
+                    self.do_map(splitter, data_queue, f_output)
 
 class TrainWord2VecModel(luigi.Task):
     """
