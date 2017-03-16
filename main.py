@@ -10,7 +10,7 @@ from gensim.models import word2vec
 import requests
 import luigi
 
-from utils import split_to_words
+from utils import MecabSplitter, JumanPPSplitter, NoWakatiSplitter
 
 class DownloadWikipediaDump(luigi.Task):
     """
@@ -69,19 +69,26 @@ class SplitWords(luigi.Task):
     """
     パースしたWikipediaの文章を分かち書きする
     """
+    splitter = luigi.Parameter(default="mecab")
     def requires(self):
         return ParseWikipediaDump()
     def output(self):
-        return luigi.LocalTarget("var/split_wikipedia.txt")
+        return luigi.LocalTarget("var/split_{}_wikipedia.txt".format(self.splitter))
     def run(self):
         pattern = re.compile('<doc.*>|<\\/doc>')
+        if self.splitter == 'mecab':
+            splitter = MecabSplitter()
+        elif self.splitter == 'jumanpp':
+            splitter = JumanPPSplitter()
+        else:
+            splitter = NoWakatiSplitter()
         with self.output().open("w") as f_output:
             for source in glob.iglob(self.input().path + "/*/wiki*"):
                 with open(source, "r") as f_input:
                     for line in f_input:
                         if pattern.match(line) or len(line) == 1:
                             continue
-                        words = split_to_words(line)
+                        words = splitter.split(line)
                         print >> f_output, " ".join(words)
 
 
@@ -89,10 +96,11 @@ class TrainWord2VecModel(luigi.Task):
     """
     Word2Vecのモデルを学習する
     """
+    splitter = luigi.Parameter(default="mecab")
     def requires(self):
-        return SplitWords()
+        return SplitWords(splitter=self.splitter)
     def output(self):
-        return luigi.LocalTarget("var/wikipedia.model")
+        return luigi.LocalTarget("var/wikipedia_{}.model".format(self.splitter))
     def run(self):
         logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
