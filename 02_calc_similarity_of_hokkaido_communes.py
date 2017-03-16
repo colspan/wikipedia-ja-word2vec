@@ -186,6 +186,7 @@ u"黒松内町"
 ]
 
 model = word2vec.Word2Vec.load("var/wikipedia.model")
+#model = word2vec.Word2Vec.load("var/wikipedia_jumanpp.model")
 out_filename = './var/similarities.csv'
 
 with open(out_filename, "w") as out_file:
