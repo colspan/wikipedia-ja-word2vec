@@ -108,7 +108,7 @@ class SplitWords(luigi.Task):
                         if len(data_queue) >= self.queue_num:
                              self.do_map(data_queue, f_output)
                              data_queue = []
-                    self.do_map(splitter, data_queue, f_output)
+                    self.do_map(data_queue, f_output)
 
 class TrainWord2VecModel(luigi.Task):
     """

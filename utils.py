@@ -34,7 +34,7 @@ class MecabSplitter():
                     words.append(info_elems[0].split('\t')[0])
             return words
         except:
-            print "Exception :".format(sentence)
+            print "Exception : {}".format(sentence)
             return []
 
 class JumanPPSplitter():
@@ -49,7 +49,7 @@ class JumanPPSplitter():
             result = self.jumanpp.analysis(sentence.decode('utf-8'))
             return [x.genkei.encode('utf-8') for x in result.mrph_list()]
         except:
-            print "Exception :".format(sentence)
+            print "Exception : {}".format(sentence)
             return []
 
 
