@@ -6,7 +6,9 @@
 
  - コーパス : [Wikipedia](https://ja.wikipedia.org/wiki/Wikipedia:%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89)
  - コーパス切り出し : [WikiExtractor](https://github.com/attardi/wikiextractor)
- - 日本語分かち書き : [mecab](http://taku910.github.io/mecab/)
+ - 日本語分かち書き
+    - [mecab](http://taku910.github.io/mecab/)
+    - [Juman++](https://github.com/ku-nlp/jumanpp)
  - モデル生成 : [gensim](https://radimrehurek.com/gensim/)
  - パイプライン記述 : [Luigi](https://github.com/spotify/luigi)
 
