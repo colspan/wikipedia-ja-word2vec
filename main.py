@@ -69,17 +69,16 @@ class ParseWikipediaDump(luigi.Task):
     def run(self):
         import os
 
-        with self.output().temporary_path() as temp_output_path:
-            args = [
-                "python",
-                "lib/wikiextractor-master/WikiExtractor.py",
-                "-b",
-                "20M",
-                "-o",
-                temp_output_path,
-                self.input().path,
-            ]
-            os.system(" ".join(args))
+        args = [
+            "wikiextractor",
+            "-b",
+            "20M",
+            "-o",
+            self.output().path,
+            self.input().path,
+        ]
+        print(" ".join(args))
+        os.system(" ".join(args))
 
 
 class SplitWords(luigi.Task):
@@ -132,7 +131,7 @@ class TrainWord2VecModel(luigi.Task):
         )
 
         sentences = word2vec.Text8Corpus(self.input().path)
-        model = word2vec.Word2Vec(sentences, size=200, min_count=20, window=15)
+        model = word2vec.Word2Vec(sentences, vector_size=200, min_count=20, window=15)
         model.save(self.output().path)
 
 
