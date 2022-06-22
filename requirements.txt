@@ -1,3 +1,6 @@
 scikit-learn
 luigi
 requests
+gensim
+mecab
+wikiextractor

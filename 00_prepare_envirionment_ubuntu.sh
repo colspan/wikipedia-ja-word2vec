@@ -3,8 +3,7 @@
 ## for Ubuntu
 sudo apt-get install -y mecab libmecab-dev mecab-ipadic-utf8
 sudo apt-get install -y python-mecab gensim
-sudo pip install -r requirements.txt
-pip install gensim mecab wikiextractor
+pip install -r requirements.txt
 
 mkdir -p downloads
 
